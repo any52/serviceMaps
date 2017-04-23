@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+  <servlet>
+    <servlet-name>EndPoint</servlet-name>
+    <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+    <init-param>
+      <param-name>javax.ws.rs.Application</param-name>
+      <param-value>ru.sample2.server.config.LocalJerseyResourceConfig</param-value>
+    </init-param>
+  </servlet>
+  <servlet>
+    <servlet-name>LoginServlet</servlet-name>
+    <servlet-class>ru.sample2.server.LoginServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>CreateUser</servlet-name>
+    <servlet-class>ru.sample2.server.CreateUserServlet</servlet-class>
+  </servlet>
+
+
+  <servlet-mapping>
+    <servlet-name>LoginServlet</servlet-name>
+    <url-pattern>/Login</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CreateUser</servlet-name>
+    <url-pattern>/Create</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>EndPoint</servlet-name>
+    <url-pattern>/SuggestBoxModule/api/*</url-pattern>
+  </servlet-mapping>
+  <display-name>GuiceSevletDemo</display-name>
+  <filter>
+    <filter-name>guiceFilter</filter-name>
+    <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>guiceFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  <listener>
+    <listener-class>ru.sample2.server.config.CountryListener</listener-class>
+  </listener>
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>SuggestBoxModule.html</welcome-file>
+  </welcome-file-list>
+
+</web-app>

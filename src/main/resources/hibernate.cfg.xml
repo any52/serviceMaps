@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <!-- Database connection settings -->
+    <property name="connection.driver_class">org.postgresql.Driver</property>
+    <property name="connection.url">jdbc:postgresql://localhost:5432/postgres</property>
+    <!-- <property name="hibernate.connection.username">Anna</property>
+    <property name="hibernate.connection.password"></property>-->
+
+       <!-- JDBC connection pool (use the built-in) -->
+    <property name="connection.pool_size">1</property>
+
+
+    <!-- Enable Hibernate's automatic session context management -->
+    <property name="current_session_context_class">thread</property>
+
+      <!-- Echo all executed SQL to stdout -->
+    <property name="show_sql">true</property>
+
+    <mapping class="ru.sample2.server.DAO.CountryEntity"/>
+    <mapping class="ru.sample2.server.DAO.AddressEntity"/>
+    <!--<mapping resource="ru/sample2/shared/AddressEntity.hbm.xml"/>-->
+    <mapping class="ru.sample2.shared.UserEntity"/>
+    <!--<mapping resource="ru/sample2/shared/UserEntity.hbm.xml"/>-->
+    <!--<mapping resource="ru/sample2/shared/RoutesEntity.hbm.xml"/>-->
+    <mapping class="ru.sample2.server.DAO.RoutesEntity"/>
+    <!--<mapping resource="ru/sample2/shared/SheduleEntity.hbm.xml"/>-->
+    <mapping class="ru.sample2.server.DAO.SheduleEntity"/>
+
+  </session-factory>
+</hibernate-configuration>
