@@ -136,12 +136,9 @@ public class View {
                     public void onClick(ClickEvent event) {
                         if (checkIsNull(startStopBox.getText(), endStopBox.getText(),
                                 dayWeekBox.getText(), timeBox.getText())) {
-                            Route data = new Route();
-                            data.setStartPoint(startStopBox.getText());
-                            data.setEndPoint(endStopBox.getText());
+                            Route data = new Route(startStopBox.getText(), endStopBox.getText());
                                 EndPoint endPoint = GWT.create(EndPoint.class);
                                 endPoint.sendRoute(data, new AsyncCallbackAddRouteService());
-//                            MySampleApplicationService.App.getInstance().addRoute(data, new MyAsyncCallback());
                             dialogBox.hide();
                         } else {
                             Window.alert("Entered invalid value!");
