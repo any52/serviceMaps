@@ -20,15 +20,14 @@
       <!-- Echo all executed SQL to stdout -->
     <property name="show_sql">true</property>
 
-    <mapping class="ru.sample2.server.DAO.CountryEntity"/>
-    <mapping class="ru.sample2.server.DAO.AddressEntity"/>
+    <mapping class="ru.sample2.server.DAO.entity.AddressEntity"/>
     <!--<mapping resource="ru/sample2/shared/AddressEntity.hbm.xml"/>-->
-    <mapping class="ru.sample2.shared.UserEntity"/>
+    <mapping class="ru.sample2.server.DAO.entity.UserEntity"/>
     <!--<mapping resource="ru/sample2/shared/UserEntity.hbm.xml"/>-->
     <!--<mapping resource="ru/sample2/shared/RoutesEntity.hbm.xml"/>-->
-    <mapping class="ru.sample2.server.DAO.RoutesEntity"/>
+    <mapping class="ru.sample2.server.DAO.entity.RoutesEntity"/>
     <!--<mapping resource="ru/sample2/shared/SheduleEntity.hbm.xml"/>-->
-    <mapping class="ru.sample2.server.DAO.SheduleEntity"/>
+    <mapping class="ru.sample2.server.DAO.entity.SheduleEntity"/>
 
   </session-factory>
 </hibernate-configuration>

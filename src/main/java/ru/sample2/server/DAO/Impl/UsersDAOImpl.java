@@ -1,11 +1,12 @@
-package ru.sample2.server;
+package ru.sample2.server.DAO.Impl;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
-import ru.sample2.shared.UserEntity;
+import ru.sample2.server.DAO.entity.UserEntity;
+import ru.sample2.server.DAO.UserDAO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +14,10 @@ import java.util.List;
 /**
  * Created by Anna on 16.04.2017.
  */
-public class UsersRepositoryImpl implements UserRepository {
+public class UsersDAOImpl implements UserDAO {
     private  List<UserEntity> users;
     private Session session;
+    private String login;
 
     @Override
     public List<UserEntity> getUsers() {
@@ -53,5 +55,21 @@ public class UsersRepositoryImpl implements UserRepository {
         session.close();
     }
 
+    public UserEntity getUser(String login) {
+        if (users == null) {
+            users = new ArrayList<>();
+        }
+        SessionFactory sessions = new Configuration().configure().buildSessionFactory();
+        session = sessions.openSession();
+        Query query = session.createQuery("FROM UserEntity WHERE login= :param");
+        query.setParameter("param", login);
+        users = query.list();
+        UserEntity user = new UserEntity();
+        if(!(users.isEmpty())){
+             user = users.get(0);
+        }
+        session.close();
+        return user;
+    }
 
 }

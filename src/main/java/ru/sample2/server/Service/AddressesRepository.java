@@ -1,4 +1,4 @@
-package ru.sample2.server;
+package ru.sample2.server.service;
 
 import ru.sample2.shared.SuggestionDTO;
 

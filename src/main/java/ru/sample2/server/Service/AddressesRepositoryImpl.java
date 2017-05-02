@@ -1,4 +1,4 @@
-package ru.sample2.server;
+package ru.sample2.server.service;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by Anna on 09.03.2017.
  */
-public class AddressesRepositoryFromBaseImpl implements AddressesRepository {
+public class AddressesRepositoryImpl implements AddressesRepository {
     private List<AddressDTO> addresses;
     private List<String> streetes;
     private List<Integer> numberHouses;

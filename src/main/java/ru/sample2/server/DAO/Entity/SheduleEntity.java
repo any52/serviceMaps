@@ -1,4 +1,4 @@
-package ru.sample2.server.DAO;
+package ru.sample2.server.DAO.entity;
 
 import javax.persistence.*;
 
@@ -13,7 +13,8 @@ public class SheduleEntity {
     private String time;
 
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, insertable = true, updatable = true)
     public int getId() {
         return id;
     }

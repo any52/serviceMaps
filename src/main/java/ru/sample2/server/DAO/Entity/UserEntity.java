@@ -1,4 +1,4 @@
-package ru.sample2.shared;
+package ru.sample2.server.DAO.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
