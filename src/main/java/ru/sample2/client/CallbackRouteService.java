@@ -8,12 +8,12 @@ import ru.sample2.shared.RouteDTO;
 /**
  * Created by Anna on 19.04.2017.
  */
-public class AsyncCallbackAddRouteService implements MethodCallback<RouteDTO> {
+public class CallbackRouteService implements MethodCallback<RouteDTO> {
 //    EventBus eventBus;
 //    EndPoint addRoute;
 
 //    @Inject
-    public AsyncCallbackAddRouteService() {
+    public CallbackRouteService() {
 //        this.eventBus = eventBus;
 //        this.addRoute = addRoute;
     }
