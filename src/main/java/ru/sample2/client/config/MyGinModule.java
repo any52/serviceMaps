@@ -4,6 +4,7 @@ package ru.sample2.client.config;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.inject.client.AbstractGinModule;
+import ru.sample2.client.CallbackRouteService;
 import ru.sample2.client.Presenter;
 import ru.sample2.client.View;
 import ru.sample2.client.model.TextModel;
@@ -21,6 +22,8 @@ public class MyGinModule extends AbstractGinModule {
         bind(Presenter.class).in(Singleton.class);
 
         bind(View.class);
+
+        bind(CallbackRouteService.class);
 
         bind(TextModel.class).in(Singleton.class);
     }

@@ -1,6 +1,7 @@
 package ru.sample2.server;
 
-import ru.sample2.shared.UserEntity;
+import ru.sample2.server.DAO.entity.UserEntity;
+import ru.sample2.server.DAO.Impl.UsersDAOImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,7 +15,11 @@ import java.util.*;
  */
 public class LoginServlet extends HttpServlet {
     private List<UserEntity> users;
+    private static String userLogin;
 
+    public static String getUserLogin() {
+        return userLogin;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -22,7 +27,7 @@ public class LoginServlet extends HttpServlet {
         resp.setContentType("text/html");
         resp.setHeader("Cache Control", "no cache");
 
-        UsersRepositoryImpl repository = new UsersRepositoryImpl();
+        UsersDAOImpl repository = new UsersDAOImpl();
         if (users == null) {
             users = new ArrayList<>();
         }
@@ -39,6 +44,7 @@ public class LoginServlet extends HttpServlet {
                 if (isPasswordValid(login, password)) {
 //                    resp.getWriter().println("<html><body><p><h1>" + "Welcome, " + login + "!" + "</h1></p></body></html>");
                     req.getRequestDispatcher("SuggestBoxModule.html").forward(req, resp);
+                    userLogin = login;
                 } else {
 //                    resp.getWriter().println("<html><body><p><h1>" + "Error, password is false! " + "</h1></p></body></html>");
                     req.getRequestDispatcher("error.html").forward(req, resp);

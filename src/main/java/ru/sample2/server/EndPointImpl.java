@@ -1,25 +1,23 @@
 package ru.sample2.server;
 
 
-import ru.sample2.shared.Route;
+import org.fusesource.restygwt.client.MethodCallback;
+import ru.sample2.server.service.AddressesRepository;
+import ru.sample2.server.service.RouteRepository;
 import ru.sample2.shared.RouteDTO;
 import ru.sample2.shared.SuggestionDTO;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 
 
 /**
  * The server side implementation of the Rest service.
  */
 
-@Path("/country")
+@Path("/serviceMap")
 public class EndPointImpl {
 
-  private static final long serialVersionUID = 1L;
   private AddressesRepository addressesRepository;
   private RouteRepository routeRepository;
 
@@ -31,18 +29,45 @@ public class EndPointImpl {
   }
 
   @GET
-  @Path("/{country}")
+  @Path("/{address}")
   @Produces("application/json")
-  public SuggestionDTO getAddressesList(@PathParam("country") final String input)  {
+  public SuggestionDTO getAddressesList(@PathParam("address") final String input)  {
 
     return addressesRepository.getAddressesList(input);
 
   }
 
   @GET
-  @Path("/getRoute/{route}")
+  @Path("/addRoute/{startpoint}/{endpoint}/{intermediatePoint1}/{intermediatePoint2}/{dayWeek}/{time}")
   @Produces("application/json")
-  public RouteDTO sendRoute(@PathParam("route")Route route){
-    return routeRepository.sendRoute(route);
+  public RouteDTO sendRoute(@PathParam("startpoint") String startPoint,
+                            @PathParam("endpoint") String endPoint,
+                            @PathParam("intermediatePoint1") String intermediatePoint1,
+                            @PathParam("intermediatePoint2") String intermediatePoint2,
+                            @PathParam("dayWeek") String dayweek,
+                            @PathParam("time") String time){
+    return routeRepository.addRoute(startPoint, endPoint, intermediatePoint1,
+            intermediatePoint2, dayweek, time);
+  }
+  @GET
+  @Path("/getRoute")
+  @Produces("application/json")
+  public RouteDTO getRoute(MethodCallback<RouteDTO> callback) {
+    return routeRepository.sendRoute();
+  }
+
+  @DELETE
+  @Path("/deleteRoute/{id}")
+  @Produces("application/json")
+  public RouteDTO deleteRoute(@PathParam("id")int id) {
+    return routeRepository.deleteRoute(id);
+  }
+
+  @GET
+  @Path("/findRoute/{startpoint}/{endpoint}")
+  @Produces("application/json")
+  public RouteDTO findRoute(@PathParam("startpoint")String startPoint,
+                            @PathParam("endpoint") String endPoint) {
+    return routeRepository.findRoutes(startPoint,endPoint);
   }
 }

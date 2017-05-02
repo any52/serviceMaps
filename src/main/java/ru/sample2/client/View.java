@@ -14,12 +14,20 @@ import com.google.gwt.maps.client.overlays.InfoWindow;
 import com.google.gwt.maps.client.overlays.InfoWindowOptions;
 import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import com.google.gwt.view.client.ListDataProvider;
+import org.fusesource.restygwt.client.Method;
+import org.fusesource.restygwt.client.MethodCallback;
 import ru.sample2.client.model.TextModel;
 import ru.sample2.shared.Route;
+import ru.sample2.shared.RouteDTO;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Anna on 02.01.2017.
@@ -27,19 +35,27 @@ import javax.inject.Inject;
 public class View {
     private EventBus eventBus;
     private Presenter presenter = new Presenter(new TextModel(), eventBus, this);
-
     public void setPresenter(Presenter presenter) {
         this.presenter = presenter;
     }
 
     final SuggestBox suggestbox = new SuggestBox(new RemoteSuggestOracle(eventBus, (EndPoint) GWT.create(EndPoint.class)));
     final Label label = new Label("No selected!");
-    final Button addRoute = new Button("Add route");
+    final Button getRoute = new Button("My routes");
+    final Button addRoute = new Button("Add");
+    final Button updateRoute = new Button("Edit");
+    final Button deleteRoute = new Button("Delete");
     final Button findRoute = new Button("Find route");
+    final CheckBox bound = new CheckBox("Add routes around 5 kilometers.");
+    final Label results = new Label("Results:");
+    final static CellTable table = new CellTable();
+    private int countRow =0;
+
     MapWidget map;
     InfoWindow infoWin;
     Marker marker;
 
+    private static List<Route> ROUTES = new ArrayList();
     @Inject
     View(EventBus eventbus) {
         this.eventBus = eventbus;
@@ -54,18 +70,75 @@ public class View {
         VerticalPanel vp2 = new VerticalPanel();
         VerticalPanel vp3 = new VerticalPanel();
 
-        LatLng center = LatLng.newInstance(55.45, 37.361);
+//        TextColumn<String> numberColumn = new TextColumn<String>() {
+//            @Override
+//            public String getValue(String object) {
+//                return String.valueOf(++countRow);
+//            }
+//
+//        };
+
+        TextColumn<Route> startStopColumn = new TextColumn<Route>() {
+            @Override
+            public String getValue(Route route) {
+                return route.getStartPoint();
+            }
+        };
+        TextColumn<Route> endStopColumn = new TextColumn<Route>() {
+            @Override
+            public String getValue(Route route) {
+                return route.getEndPoint();
+            }
+        };
+        TextColumn<Route> intetmStop1Column = new TextColumn<Route>() {
+            @Override
+            public String getValue(Route route) {
+                return route.getIntermediatePoint1();
+            }
+        };
+        TextColumn<Route> intetmStop2Column = new TextColumn<Route>() {
+            @Override
+            public String getValue(Route route) {
+                return route.getIntermediatePoint2();
+            }
+        };
+        TextColumn<Route> dayWeekColumn = new TextColumn<Route>() {
+            @Override
+            public String getValue(Route route) {
+                return route.getDayWeek();
+            }
+        };
+        TextColumn<Route> timeColumn = new TextColumn<Route>() {
+            @Override
+            public String getValue(Route route) {
+                return route.getTime();
+            }
+        };
+
+        // Add the columns.
+
+//        table.addColumn(numberColumn, "№");
+        table.addColumn(startStopColumn, "Startstop");
+        table.addColumn(endStopColumn, "Endstop");
+        table.addColumn(intetmStop1Column, "Intermediate point1");
+        table.addColumn(intetmStop2Column, "Intermediate point2");
+        table.addColumn(dayWeekColumn, "Day week");
+        table.addColumn(timeColumn, "Time");
+        table.setRowCount(ROUTES.size(), true);
+
+        LatLng center = LatLng.newInstance(56.32867, 44.00205);
         MapOptions opts = MapOptions.newInstance();
-        opts.setZoom(8);
+        opts.setZoom(10);
         opts.setCenter(center);
         opts.setMapTypeId(MapTypeId.ROADMAP);
         opts.setMapMaker(true);
         map = new MapWidget(opts);
-        map.setSize("500px", "500px");
+        map.setSize("300px", "300px");
 
         MarkerOptions markerOptions = MarkerOptions.newInstance();
         markerOptions.setTitle("Street");
         InfoWindowOptions infoWindowOptions = InfoWindowOptions.newInstance();
+        infoWindowOptions.setContent("Нижний Новгорд");
         marker = Marker.newInstance(markerOptions);
         marker.setPosition(center);
         marker.setMap(map);
@@ -77,8 +150,14 @@ public class View {
         vp1.add(label);
         vp2.add(map);
         vp1.add(vp3);
+        vp3.add(getRoute);
         vp3.add(addRoute);
+        vp3.add(updateRoute);
+        vp3.add(deleteRoute);
         vp3.add(findRoute);
+        vp3.add(bound);
+        vp3.add(results);
+        vp3.add(table);
         hp.add(vp1);
         hp.add(vp2);
         RootPanel.get("ListContainer").add(hp);
@@ -93,6 +172,13 @@ public class View {
                 presenter.geolocation();
             }
         });
+        getRoute.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                EndPoint endPoint = GWT.create(EndPoint.class);
+                endPoint.getRoute(new LoadRoutesCallback());
+            }
+        });
 
         addRoute.addClickHandler(new ClickHandler() {
             @Override
@@ -102,9 +188,11 @@ public class View {
                 final HorizontalPanel panel = new HorizontalPanel();
                 final Label title = new Label("Add route");
                 final Button okButton = new Button("Yes");
-                Button noButton = new Button("No");
+                final Button noButton = new Button("No");
                 final TextBox startStopBox = new TextBox();
                 final TextBox endStopBox = new TextBox();
+                final TextBox intermediatePointBox1 = new TextBox();
+                final TextBox intermediatePointBox2 = new TextBox();
                 final TextBox dayWeekBox = new TextBox();
                 final TextBox timeBox = new TextBox();
                 final HorizontalPanel horizontalPanel = new HorizontalPanel();
@@ -117,6 +205,8 @@ public class View {
 //                title.addStyleName("gwt-LabelTitle");
                 startStopBox.setText("Enter start stop");
                 endStopBox.setText("Enter end stop");
+                intermediatePointBox1.setText("Enter first intermediate point");
+                intermediatePointBox2.setText("Enter second intermediate point");
                 dayWeekBox.setText("Check day of week");
                 timeBox.setText("Enter time");
                 horizontalPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
@@ -126,6 +216,8 @@ public class View {
                 dialogVPanel.add(title);
                 dialogVPanel.add(startStopBox);
                 dialogVPanel.add(endStopBox);
+                dialogVPanel.add(intermediatePointBox1);
+                dialogVPanel.add(intermediatePointBox2);
                 dialogVPanel.add(dayWeekBox);
                 dialogVPanel.add(timeBox);
                 dialogVPanel.add(horizontalPanel);
@@ -136,9 +228,14 @@ public class View {
                     public void onClick(ClickEvent event) {
                         if (checkIsNull(startStopBox.getText(), endStopBox.getText(),
                                 dayWeekBox.getText(), timeBox.getText())) {
-                            Route data = new Route(startStopBox.getText(), endStopBox.getText());
                                 EndPoint endPoint = GWT.create(EndPoint.class);
-                                endPoint.sendRoute(data, new AsyncCallbackAddRouteService());
+                                endPoint.sendRoute(startStopBox.getText(),
+                                        endStopBox.getText(),
+                                        intermediatePointBox1.getText(),
+                                        intermediatePointBox2.getText(),
+                                        dayWeekBox.getText(),
+                                        timeBox.getText(),
+                                        new LoadRoutesCallback());
                             dialogBox.hide();
                         } else {
                             Window.alert("Entered invalid value!");
@@ -213,10 +310,9 @@ public class View {
                 okButton.addClickHandler(new ClickHandler() {
                     public void onClick(ClickEvent event) {
                         if (checkIsNull(startStopBox.getText(), endStopBox.getText())) {
-//                            Route data = new Route(Integer.parseInt(numberBox.getText()), startStopBox.getText(),
-//                                    dayWeekBox.getText(), curStopBox.getText(), timeBox.getText());
-//
-//                            MySampleApplicationService.App.getInstance().addRoute(data, new MyAsyncCallback());
+                            EndPoint endPoint = GWT.create(EndPoint.class);
+                            endPoint.findRoute(startStopBox.getText(), endStopBox.getText(),
+                                    new LoadRoutesCallback());
                             dialogBox.hide();
                         } else {
                             Window.alert("Entered invalid value!");
@@ -258,5 +354,26 @@ public class View {
             if (startStop.equals("") || endStop.equals("")) return false;
             return true;
         }
+
+    private static class LoadRoutesCallback implements MethodCallback<RouteDTO> {
+        @Override
+        public void onFailure(Method method, Throwable throwable) {
+            Window.alert("Route did not added!");
+        }
+
+        @Override
+        public void onSuccess(Method method, RouteDTO result){
+            ROUTES = result.getRoutes();
+
+            // Push the data into the widget.
+            table.setRowData(0, ROUTES);
+
+            ListDataProvider<Route> dataProvider = new ListDataProvider();
+            dataProvider.addDataDisplay(table);
+            dataProvider.setList(ROUTES);
+            Window.alert("Route added succsesefully!" + result.getRoutes().toString());
+        }
+    }
+
 
 }

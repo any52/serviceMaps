@@ -1,6 +1,7 @@
 package ru.sample2.server;
 
-import ru.sample2.shared.UserEntity;
+import ru.sample2.server.DAO.entity.UserEntity;
+import ru.sample2.server.DAO.Impl.UsersDAOImpl;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +16,15 @@ import java.util.List;
  */
 public class CreateUserServlet extends HttpServlet {
     private List<UserEntity> users;
+    private static String userLogin;
+
+    public static String getUserLogin() {
+        return userLogin;
+    }
+
+    public void setUserLogin(String userLogin) {
+        this.userLogin = userLogin;
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -26,22 +36,26 @@ public class CreateUserServlet extends HttpServlet {
         if (users == null) {
             users = new ArrayList<>();
         }
-        UsersRepositoryImpl repository = new UsersRepositoryImpl();
+        UsersDAOImpl repository = new UsersDAOImpl();
         if (users.isEmpty()) {
             users = repository.getUsers();
         }
-        for (UserEntity user: users ) {
+        boolean isExist = false;
+        for (UserEntity user : users) {
             if (user.getLogin().equals(login)) {
                 req.getRequestDispatcher("errorLogin.html").forward(req, resp);
+                isExist = true;
                 break;
             }
 
         }
-        repository.addUser(login, password);
-        req.getRequestDispatcher("SuggestBoxModule.html").forward(req, resp);
 
+        if (!(isExist)) {
+            repository.addUser(login, password);
+            req.getRequestDispatcher("SuggestBoxModule.html").forward(req, resp);
+            userLogin = login;
+        }
 
-//        resp.getWriter().println("<html><body><p><h1>" + "Login is existed successfully!" + "</h1></p></body></html>");
 
     }
 
