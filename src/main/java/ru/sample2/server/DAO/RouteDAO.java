@@ -12,4 +12,6 @@ public interface RouteDAO {
     void addRoute(Route route);
 
     List<Route> getAllRoute();
+
+    List<Route> findRoute(String startpoint, String endpoint);
 }
