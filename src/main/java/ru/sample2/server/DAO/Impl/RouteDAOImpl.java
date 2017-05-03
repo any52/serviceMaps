@@ -6,10 +6,10 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import ru.sample2.server.CreateUserServlet;
+import ru.sample2.server.DAO.RouteDAO;
 import ru.sample2.server.DAO.entity.RoutesEntity;
 import ru.sample2.server.DAO.entity.SheduleEntity;
 import ru.sample2.server.DAO.entity.UserEntity;
-import ru.sample2.server.DAO.RouteDAO;
 import ru.sample2.server.LoginServlet;
 import ru.sample2.shared.Route;
 
@@ -83,8 +83,8 @@ public class RouteDAOImpl implements RouteDAO {
     }
     public SheduleEntity createShedule(String dayWeek, String time) {
         SheduleEntity newShedule = new SheduleEntity();
-        newShedule.setTime(dayWeek);
-        newShedule.setDayweek(time);
+        newShedule.setDayweek(dayWeek);
+        newShedule.setTime(time);
         session.save(newShedule);
         return newShedule;
     }
@@ -120,6 +120,52 @@ public class RouteDAOImpl implements RouteDAO {
         }
         session.close();
         return  routes;
+    }
+
+    @Override
+    public List<Route> deleteRoute(String startPoint, String endPoint, String dayweek, String time) {
+        SessionFactory sessions = new Configuration().configure().buildSessionFactory();
+        session = sessions.openSession();
+        Transaction tx = session.beginTransaction();
+
+        UserEntity currentUser = getUserFromRepository();
+
+        Query queryShedule = session.createQuery("from SheduleEntity where lower(dayweek) like :param4 and lower(time) like :param5 ");
+        queryShedule.setParameter("param4", dayweek);
+        queryShedule.setParameter("param5",time);
+        List <SheduleEntity> sheduleList = queryShedule.list();
+        System.out.println("Shedulelist:" + sheduleList.toString());
+        System.out.println("Size" + sheduleList.size());
+
+        //first element
+        ArrayList<Integer> idShedule = new ArrayList<>();
+//        for (SheduleEntity shedule : sheduleList) {
+//            idShedule.add(shedule.getId());
+//        }
+        SheduleEntity newShedule = new SheduleEntity();
+        newShedule.setDayweek(dayweek);
+        newShedule.setTime(time);
+
+        Query query = session.createQuery("delete from RoutesEntity where user = :param " +
+                "and lower(startpoint) like :param1 and lower(endpoint) like :param2 " +
+                "and shedules in (:param3)" );
+        query.setParameter("param", currentUser);
+        query.setParameter("param1", startPoint);
+        query.setParameter("param2", endPoint);
+        query.setParameter("param3", sheduleList);
+//        Query query = session.createQuery("delete from RoutesEntity where startpoint like :param");
+//        query.setParameter("param", "afasf");
+//        session.delete();
+        query.executeUpdate();
+//        List<RoutesEntity> result  = query.list();
+//        System.out.println("Shedulelist:" + result.toString());
+        System.out.println("Size result=" + sheduleList.size());
+        System.out.println("Deleted"+ query.executeUpdate());
+
+        tx.commit();
+
+        session.close();
+        return getAllRoute();
     }
 
 }
