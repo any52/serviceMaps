@@ -3,8 +3,7 @@ package ru.sample2.client;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.maps.client.base.LatLng;
-import com.google.gwt.maps.client.overlays.InfoWindowOptions;
-import com.google.gwt.maps.client.overlays.MarkerOptions;
+import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.services.*;
 import com.google.gwt.user.client.Window;
 import ru.sample2.client.model.TextModel;
@@ -35,9 +34,13 @@ public class Presenter {
         view.label.setText("You choosed: " + model.getText());
 
     }
-    public void geolocation() {
-
+    public  void geolocationForAddressBox() {
         String address = "Россия, Нижний Новгород, " + model.getText();
+        geolocation(address, view.markerStartPoint);
+        geolocation(address, view.markerEndPoint);
+    }
+    public void geolocation(final String address, final Marker marker) {
+
         GeocoderRequest request = GeocoderRequest.newInstance();
         request.setAddress(address);
         final Geocoder geoCoder = Geocoder.newInstance();
@@ -48,11 +51,8 @@ public class Presenter {
                     GeocoderResult result = jsArray.shift();
                     LatLng cootdinates = result.getGeometry().getLocation();
                     view.map.setCenter(cootdinates);
-                    MarkerOptions markerOptions = MarkerOptions.newInstance();
-                    markerOptions.setTitle("Street");
-                    InfoWindowOptions infoWindowOptions = InfoWindowOptions.newInstance();
-                    view.marker.setPosition(cootdinates);
-                    view.marker.setMap(view.map);
+                    marker.setPosition(cootdinates);
+                    marker.setMap(view.map);
 
                 }
                 else {
@@ -60,5 +60,18 @@ public class Presenter {
                 }
             }
         });
+    }
+
+    public void geolocationForRoute(String startPoint, String endPoint, Marker markerSrartPoint, Marker markerEndPoint) {
+        String addressStartPoint = "Россия, Нижний Новгород, " + startPoint;
+        String addressEndPoint = "Россия, Нижний Новгород, " + endPoint;
+        geolocation(addressStartPoint, markerSrartPoint);
+        geolocation(addressEndPoint, markerEndPoint);
+//        view.infoWinStartPoint.close();
+//        view.infoWinEndPoint.close();
+//        view.infoWinStartPoint.setContent(startPoint);
+//        view.infoWinEndPoint.setContent(endPoint);
+//        view.infoWinStartPoint.open(view.map);
+//        view.infoWinEndPoint.open(view.map);
     }
 }

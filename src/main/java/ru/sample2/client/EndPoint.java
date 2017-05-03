@@ -43,7 +43,11 @@ public interface EndPoint extends RestService {
                    MethodCallback<RouteDTO> callback);
 
     @DELETE
-    @Path("/deleteRoute/{id}")
-    void deleteRoute(@PathParam("id") int id, MethodCallback<RouteDTO> callback);
+    @Path("/deleteRoute/{startpoint}/{endpoint}/{dayWeek}/{time}")
+    void deleteRoute(@PathParam("startpoint") String startPoint,
+                     @PathParam("endpoint") String endPoint,
+                    @PathParam("dayWeek") String dayweek,
+                     @PathParam("time") String time,
+                     MethodCallback<RouteDTO> callback);
 
 }

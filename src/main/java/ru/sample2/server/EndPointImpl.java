@@ -57,10 +57,13 @@ public class EndPointImpl {
   }
 
   @DELETE
-  @Path("/deleteRoute/{id}")
+  @Path("/deleteRoute/{startpoint}/{endpoint}/{dayWeek}/{time}")
   @Produces("application/json")
-  public RouteDTO deleteRoute(@PathParam("id")int id) {
-    return routeRepository.deleteRoute(id);
+  public RouteDTO deleteRoute(@PathParam("startpoint") String startPoint,
+                              @PathParam("endpoint") String endPoint,
+                              @PathParam("dayWeek") String dayweek,
+                              @PathParam("time") String time) {
+    return routeRepository.deleteRoute(startPoint,endPoint, dayweek, time);
   }
 
   @GET

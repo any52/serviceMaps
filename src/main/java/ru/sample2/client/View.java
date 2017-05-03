@@ -19,6 +19,8 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.NoSelectionModel;
+import com.google.gwt.view.client.SelectionChangeEvent;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import ru.sample2.client.model.TextModel;
@@ -35,6 +37,7 @@ import java.util.List;
 public class View {
     private EventBus eventBus;
     private Presenter presenter = new Presenter(new TextModel(), eventBus, this);
+
     public void setPresenter(Presenter presenter) {
         this.presenter = presenter;
     }
@@ -43,17 +46,22 @@ public class View {
     final Label label = new Label("No selected!");
     final Button getRoute = new Button("My routes");
     final Button addRoute = new Button("Add");
-    final Button updateRoute = new Button("Edit");
-    final Button deleteRoute = new Button("Delete");
+//    final Button updateRoute = new Button("Edit");
+//    final Button deleteRoute = new Button("Delete");
     final Button findRoute = new Button("Find route");
-    final CheckBox bound = new CheckBox("Add routes around 5 kilometers.");
+//    final CheckBox bound = new CheckBox("Add routes around 5 kilometers.");
     final Label results = new Label("Results:");
     final static CellTable table = new CellTable();
     private int countRow =0;
 
     MapWidget map;
     InfoWindow infoWin;
+    InfoWindow infoWinStartPoint;
+    InfoWindow infoWinEndPoint;
     Marker marker;
+    Marker markerStartPoint;
+    Marker markerEndPoint;
+
 
     private static List<Route> ROUTES = new ArrayList();
     @Inject
@@ -69,6 +77,7 @@ public class View {
         VerticalPanel vp1 = new VerticalPanel();
         VerticalPanel vp2 = new VerticalPanel();
         VerticalPanel vp3 = new VerticalPanel();
+        HorizontalPanel hp4  = new HorizontalPanel();
 
 //        TextColumn<String> numberColumn = new TextColumn<String>() {
 //            @Override
@@ -133,29 +142,33 @@ public class View {
         opts.setMapTypeId(MapTypeId.ROADMAP);
         opts.setMapMaker(true);
         map = new MapWidget(opts);
-        map.setSize("300px", "300px");
+        map.setSize("500px", "500px");
 
         MarkerOptions markerOptions = MarkerOptions.newInstance();
-        markerOptions.setTitle("Street");
         InfoWindowOptions infoWindowOptions = InfoWindowOptions.newInstance();
         infoWindowOptions.setContent("Нижний Новгорд");
         marker = Marker.newInstance(markerOptions);
+        markerStartPoint = Marker.newInstance(markerOptions);
+        markerEndPoint= Marker.newInstance(markerOptions);
         marker.setPosition(center);
-        marker.setMap(map);
+//        marker.setMap(map);
         infoWin = InfoWindow.newInstance(infoWindowOptions);
+        infoWinStartPoint = InfoWindow.newInstance(infoWindowOptions);
+        infoWinEndPoint =InfoWindow.newInstance(infoWindowOptions);
         infoWin.setPosition(center);
         infoWin.open(map);
 
         vp1.add(suggestbox);
         vp1.add(label);
         vp2.add(map);
+        vp1.add(hp4);
         vp1.add(vp3);
-        vp3.add(getRoute);
-        vp3.add(addRoute);
-        vp3.add(updateRoute);
-        vp3.add(deleteRoute);
-        vp3.add(findRoute);
-        vp3.add(bound);
+        hp4.add(getRoute);
+        hp4.add(addRoute);
+//        vp3.add(updateRoute);
+//        vp3.add(deleteRoute);
+        hp4.add(findRoute);
+//        vp3.add(bound);
         vp3.add(results);
         vp3.add(table);
         hp.add(vp1);
@@ -169,7 +182,7 @@ public class View {
                 String selected = suggestbox.getValue();
                 presenter.changeModel(selected);
                 presenter.updateLabel();
-                presenter.geolocation();
+                presenter.geolocationForAddressBox();
             }
         });
         getRoute.addClickHandler(new ClickHandler() {
@@ -344,6 +357,60 @@ public class View {
 
             }
         });
+
+        final NoSelectionModel<Route> selectionModelMyObj = new NoSelectionModel<Route>();
+        SelectionChangeEvent.Handler tableHandler = new SelectionChangeEvent.Handler() {
+
+            @Override
+            public void onSelectionChange(SelectionChangeEvent event) {
+                final Route clickedObj = selectionModelMyObj.getLastSelectedObject();
+                final DialogBox dialogBox = new DialogBox();
+//                dialogBox.setStyleName("dialogBox");
+                final Label title = new Label("Are you sure to delete route?");
+                final Label object = new Label(clickedObj.toString());
+//                title.addStyleName("gwt-LabelTitle");
+//                object.addStyleName("gwt-LabelOblect");
+                final Button okButton = new Button("Yes");
+                okButton.setStyleName("gwt-Button");
+                final Button noButton = new Button("No");
+                noButton.setStyleName("gwt-Button");
+                VerticalPanel dialogVPanel = new VerticalPanel();
+                HorizontalPanel horizontalPanel = new HorizontalPanel();
+                horizontalPanel.add(okButton);
+                horizontalPanel.add(noButton);
+                dialogVPanel.add(title);
+                dialogVPanel.add(object);
+                dialogVPanel.add(horizontalPanel);
+                dialogBox.setWidget(dialogVPanel);
+                dialogBox.center();
+                dialogBox.show();
+                presenter.geolocationForRoute(clickedObj.getStartPoint(), clickedObj.getEndPoint(), markerStartPoint, markerEndPoint);
+
+                okButton.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        EndPoint endPoint = GWT.create(EndPoint.class);
+                        endPoint.deleteRoute(clickedObj.getStartPoint(),
+                                clickedObj.getEndPoint(),
+                                clickedObj.getDayWeek(),
+                                clickedObj.getTime(),
+                                new LoadRoutesCallback());
+                        dialogBox.hide();
+                    }
+                });
+                noButton.addClickHandler(new ClickHandler() {
+                    @Override
+                    public void onClick(ClickEvent event) {
+                        dialogBox.hide();
+                    }
+                });
+//                Window.alert("Object selected: " + clickedObj);
+            }
+        };
+        // Add the handler to the selection model
+        selectionModelMyObj.addSelectionChangeHandler(tableHandler);
+        // Add the selection model to the table
+        table.setSelectionModel(selectionModelMyObj);
     }
         public boolean checkIsNull (String startStop, String endStop, String dayWeek, String time){
             if (startStop.equals("") || endStop.equals("") || dayWeek.equals("") || time.equals("")) return false;
@@ -371,7 +438,7 @@ public class View {
             ListDataProvider<Route> dataProvider = new ListDataProvider();
             dataProvider.addDataDisplay(table);
             dataProvider.setList(ROUTES);
-            Window.alert("Route added succsesefully!" + result.getRoutes().toString());
+
         }
     }
 
